@@ -1,0 +1,84 @@
+service: rest-api
+
+provider:
+  name: aws
+  runtime: nodejs6.10 # set node.js runtime
+  memorySize: 128 # set the maximum memory of the Lambdas in Megabytes
+  timeout: 10 # the timeout is 10 seconds (default is 6 seconds)
+  stage: dev # setting the env stage to dev, this will be visible in the routes
+  region: us-east-1
+
+functions: # add 4 functions for CRUD
+  hello:
+    handler: handler.hello
+    events:
+      - http:
+          path: hello
+          method: get
+          cors: true
+  create:
+    handler: handler.create # point to exported create function in handler.js
+    events:
+      - http:
+          path: notes # path will be domain.name.com/dev/notes
+          method: post
+          cors: true
+  getOne:
+    handler: handler.getOne
+    events:
+      - http:
+          path: notes/{id} # path will be domain.name.com/dev/notes/1
+          method: get
+          cors: true
+  getAllAdmin:
+    handler: handler.getAllAdmin # path will be domain.name.com/dev/notes
+    events:
+     - http:
+         path: admin
+         method: get
+         cors: true
+  getAllAgency:
+    handler: handler.getAllAgency # path will be domain.name.com/dev/notes
+    events:
+     - http:
+         path: agency
+         method: get
+         cors: true
+  getAllCategory:
+    handler: handler.getAllCategory # path will be domain.name.com/dev/notes
+    events:
+     - http:
+         path: category
+         method: get
+         cors: true
+  getAllCounty:
+    handler: handler.getAllCounty # path will be domain.name.com/dev/notes
+    events:
+     - http:
+         path: county
+         method: get
+         cors: true
+  getAllEligibility:
+    handler: handler.getAllEligibility # path will be domain.name.com/dev/notes
+    events:
+     - http:
+         path: eligibility
+         method: get
+         cors: true
+  update:
+    handler: handler.update # path will be domain.name.com/dev/notes/1
+    events:
+     - http:
+         path: notes/{id}
+         method: put
+         cors: true
+  delete:
+    handler: handler.delete
+    events:
+     - http:
+         path: notes/{id} # path will be domain.name.com/dev/notes/1
+         method: delete
+         cors: true
+
+plugins:
+- serverless-offline # adding the plugin to be able to run the offline emulation
