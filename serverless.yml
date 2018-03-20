@@ -51,6 +51,13 @@ functions: # add 4 functions for CRUD
          path: eligibility
          method: get
          cors: true
+  getAllAgencyRequests:
+    handler: handler.getAllAgencyRequests # path will be domain.name.com/dev/notes
+    events:
+     - http:
+         path: agencyrequests
+         method: get
+         cors: true
 
 plugins:
 - serverless-offline # adding the plugin to be able to run the offline emulation
