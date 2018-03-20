@@ -2,64 +2,63 @@ service: rest-api
 
 provider:
   name: aws
-  runtime: nodejs6.10 # set node.js runtime
-  memorySize: 128 # set the maximum memory of the Lambdas in Megabytes
-  timeout: 10 # the timeout is 10 seconds (default is 6 seconds)
-  stage: dev # setting the env stage to dev, this will be visible in the routes
+  runtime: nodejs6.10
+  memorySize: 512 # max memory in MB
+  timeout: 10
   region: us-east-1
 
-functions: # add 4 functions for CRUD
+functions:
   createAgency:
-      handler: handler.createAgency # path will be domain.name.com/dev/notes
+      handler: handler.createAgency
       events:
       - http:
           path: agency
           method: post
           cors: true
   createCategory:
-      handler: handler.createCategory # path will be domain.name.com/dev/notes
+      handler: handler.createCategory
       events:
       - http:
           path: category
           method: post
           cors: true
   getAllAdmin:
-    handler: handler.getAllAdmin # path will be domain.name.com/dev/notes
+    handler: handler.getAllAdmin
     events:
      - http:
          path: admin
          method: get
          cors: true
   getAllAgency:
-    handler: handler.getAllAgency # path will be domain.name.com/dev/notes
+    handler: handler.getAllAgency
     events:
      - http:
          path: agency
          method: get
          cors: true
   getAllCategory:
-    handler: handler.getAllCategory # path will be domain.name.com/dev/notes
+    handler: handler.getAllCategory
     events:
      - http:
          path: category
          method: get
          cors: true
   getAllCounty:
-    handler: handler.getAllCounty # path will be domain.name.com/dev/notes
+    handler: handler.getAllCounty
     events:
      - http:
          path: county
          method: get
          cors: true
   getAllEligibility:
-    handler: handler.getAllEligibility # path will be domain.name.com/dev/notes
+    handler: handler.getAllEligibility
     events:
      - http:
          path: eligibility
          method: get
          cors: true
   getAllAgencyRequests:
-    handler: handler.getAllAgencyRequests # path will be domain.name.com/dev/notes
+    handler: handler.getAllAgencyRequests
     events:
      - http:
          path: agencyrequests
@@ -69,25 +68,25 @@ functions: # add 4 functions for CRUD
     handler: handler.deleteAgency
     events:
       - http:
-          path: agency # path will be domain.name.com/dev/notes/1
+          path: agency/1
           method: delete
           cors: true
   deleteCategory:
     handler: handler.deleteCategory
     events:
       - http:
-          path: category # path will be domain.name.com/dev/notes/1
+          path: category/1
           method: delete
           cors: true
   updateAgency:
-      handler: handler.updateAgency # path will be domain.name.com/dev/notes
+      handler: handler.updateAgency
       events:
       - http:
           path: agency
           method: put
           cors: true
   updateCategory:
-      handler: handler.updateCategory # path will be domain.name.com/dev/notes
+      handler: handler.updateCategory
       events:
       - http:
           path: category
@@ -95,4 +94,4 @@ functions: # add 4 functions for CRUD
           cors: true
 
 plugins:
-- serverless-offline # adding the plugin to be able to run the offline emulation
+- serverless-offline
