@@ -29,6 +29,10 @@ module.exports.createAgency = (event, context, callback) => {
 
       newAgency.save((err, saved) => callback(err, {
         statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+          "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+        },
         body: {agency: saved}
       }));      
     })
@@ -58,6 +62,10 @@ module.exports.createCategory = (event, context, callback) => {
             subcategories: subs
           }, {upsert:true}, (err, saved) => callback(err, {
             statusCode: 200,
+            headers: {
+              "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+              "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+            },
             body: {agency: saved}
           })
         )}
@@ -229,6 +237,10 @@ module.exports.updateAgency = (event, context, callback) => {
           emails: email_array
         }, {upsert:true}, (err, saved) => callback(err, {
           statusCode: 200,
+          headers: {
+            "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+            "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+          },
           body: {agency: saved}
         })
       );
@@ -261,6 +273,10 @@ module.exports.updateCategory = (event, context, callback) => {
         subcategories: req.subcategories,
       }, { upsert: true }, (err, saved) => callback(err, {
         statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+          "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+        },
         body: saved
       }));
     });
@@ -274,6 +290,10 @@ module.exports.deleteAgency = (event, context, callback) => {
       let req = JSON.parse(event.body);
       Agency.remove({ _id: req.id }, (err, saved) => callback(err, {
         statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+          "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+        },
         body: {agency: saved}
       }));
     })
@@ -287,6 +307,10 @@ module.exports.deleteCategory = (event, context, callback) => {
       let req = JSON.parse(event.body);
       Category.remove({ _id: req.id }, (err, saved) => callback(err, {
         statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+          "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+        },
         body: {agency: saved}
       }));
     })
