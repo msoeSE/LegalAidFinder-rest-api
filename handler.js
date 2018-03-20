@@ -23,7 +23,32 @@ module.exports.hello = function(event, context, callback) {
   callback(null, response);
 };
 
-module.exports.create = (event, context, callback) => {
+module.exports.createAgency = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase()
+    .then(() => {
+      let req = JSON.parse(event.body);
+      var email_array = []
+      req.emails.forEach((email) => {
+        email_array.push(email.address);
+      });
+
+      var newAgency = new Agency({
+        name: req.name,
+        url: req.url,
+        emails: email_array,
+        _id: mongoose.Types.ObjectId()
+      });
+
+      newAgency.save((err, saved) => callback(err, {
+        statusCode: 200,
+        body: {agency: saved}
+      }));      
+    })
+};
+
+module.exports.createCategory = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
 
   connectToDatabase()
@@ -35,27 +60,22 @@ module.exports.create = (event, context, callback) => {
         parent: req.parent,
       });
 
-      let res = { 
-        statusCode: 201,
-        headers: {
-          "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
-          "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
-        },
-        body: ''
-      }
       newCategory.save((err, saved) => {
-        res.body = 'hi'
         if (err) {
-          res.statusCode = 500;
-          res.body = err;
+          callback(err);
         } else {
-            res.body = JSON.stringify(req);
-        }
-      })
-      
-      callback(null, res);
-
-      
+          let subs = req.parent.subcategories;
+          subs.push(saved);
+          Category.findOneAndUpdate({ _id: req.parent._id },
+          {
+            name: req.parent.name,
+            subcategories: subs
+          }, {upsert:true}, (err, saved) => callback(err, {
+            statusCode: 200,
+            body: {agency: saved}
+          })
+        )}
+      });
     })
 };
 

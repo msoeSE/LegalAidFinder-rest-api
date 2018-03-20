@@ -9,11 +9,18 @@ provider:
   region: us-east-1
 
 functions: # add 4 functions for CRUD
-  create:
-      handler: handler.create # path will be domain.name.com/dev/notes
+  createAgency:
+      handler: handler.createAgency # path will be domain.name.com/dev/notes
       events:
       - http:
-          path: notes
+          path: agency
+          method: post
+          cors: true
+  createCategory:
+      handler: handler.createCategory # path will be domain.name.com/dev/notes
+      events:
+      - http:
+          path: category
           method: post
           cors: true
   getAllAdmin:

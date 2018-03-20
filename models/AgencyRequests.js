@@ -7,4 +7,4 @@ const AgencyRequestsSchema = new mongoose.Schema({
   url: { type: 'String' },
 });
 
-module.exports = mongoose.model('Requests', AgencyRequestsSchema);
+module.exports = mongoose.model('Agencyrequests', AgencyRequestsSchema);
