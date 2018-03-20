@@ -1,7 +1,6 @@
 {
   "name": "rest-api",
   "version": "1.0.0",
-  "description": "",
   "main": "handler.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -15,6 +14,16 @@
   "dependencies": {
     "dotenv": "^5.0.0",
     "mongoose": "^5.0.6",
-    "serverless": "^1.26.1"
-  }
+    "serverless": "^1.26.1",
+    "sls": "^0.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/msoeSE/legalAidFinder-rest-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/msoeSE/legalAidFinder-rest-api/issues"
+  },
+  "homepage": "https://github.com/msoeSE/legalAidFinder-rest-api#readme",
+  "description": ""
 }

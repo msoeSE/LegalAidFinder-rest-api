@@ -1,6 +1,7 @@
 'use strict';
 require('dotenv').config({ path: './variables.env' });
 const connectToDatabase = require('./db');
+const mongoose = require('mongoose');
 const Admin = require('./models/Admin');
 const Agency = require('./models/Agency');
 const Category = require('./models/Category');
@@ -26,17 +27,35 @@ module.exports.create = (event, context, callback) => {
 
   connectToDatabase()
     .then(() => {
-      Note.create(JSON.parse(event.body))
-        .then(note => callback(null, {
-          statusCode: 200,
-          body: JSON.stringify(note)
-        }))
-        .catch(err => callback(null, {
-          statusCode: err.statusCode || 500,
-          headers: { 'Content-Type': 'text/plain' },
-          body: 'Could not create the note.'
-        }));
-    });
+      let req = JSON.parse(event.body);
+      var newCategory = new Category({
+        name: req.name,
+        _id: mongoose.Types.ObjectId(),
+        parent: req.parent,
+      });
+
+      let res = { 
+        statusCode: 201,
+        headers: {
+          "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+          "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+        },
+        body: ''
+      }
+      newCategory.save((err, saved) => {
+        res.body = 'hi'
+        if (err) {
+          res.statusCode = 500;
+          res.body = err;
+        } else {
+            res.body = JSON.stringify(req);
+        }
+      })
+      
+      callback(null, res);
+
+      
+    })
 };
 
 module.exports.getOne = (event, context, callback) => {

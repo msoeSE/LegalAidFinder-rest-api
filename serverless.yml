@@ -9,6 +9,13 @@ provider:
   region: us-east-1
 
 functions: # add 4 functions for CRUD
+  create:
+      handler: handler.create # path will be domain.name.com/dev/notes
+      events:
+      - http:
+          path: notes
+          method: post
+          cors: true
   getAllAdmin:
     handler: handler.getAllAdmin # path will be domain.name.com/dev/notes
     events:
