@@ -6,6 +6,7 @@ const Agency = require('./models/Agency');
 const Category = require('./models/Category');
 const County = require('./models/County');
 const Eligibility = require('./models/Eligibility');
+const AgencyRequests = require('./models/AgencyRequests');
 
 module.exports.hello = function(event, context, callback) {
 
@@ -93,6 +94,28 @@ module.exports.getAllAgency = (event, context, callback) => {
             "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
           },
           body: JSON.stringify(agencies)
+        }))
+        .catch(err => callback(null, {
+          statusCode: err.statusCode || 500,
+          headers: { 'Content-Type': 'text/plain' },
+          body: 'Could not fetch the notes.'
+        }))
+    });
+};
+
+module.exports.getAllAgencyRequests = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase()
+    .then(() => {
+      AgencyRequests.find()
+        .then(requests => callback(null, {
+          statusCode: 200,
+          headers: {
+            "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+            "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+          },
+          body: JSON.stringify(requests)
         }))
         .catch(err => callback(null, {
           statusCode: err.statusCode || 500,
