@@ -65,6 +65,34 @@ functions: # add 4 functions for CRUD
          path: agencyrequests
          method: get
          cors: true
+  deleteAgency:
+    handler: handler.deleteAgency
+    events:
+      - http:
+          path: agency # path will be domain.name.com/dev/notes/1
+          method: delete
+          cors: true
+  deleteCategory:
+    handler: handler.deleteCategory
+    events:
+      - http:
+          path: category # path will be domain.name.com/dev/notes/1
+          method: delete
+          cors: true
+  updateAgency:
+      handler: handler.updateAgency # path will be domain.name.com/dev/notes
+      events:
+      - http:
+          path: agency
+          method: put
+          cors: true
+  updateCategory:
+      handler: handler.updateCategory # path will be domain.name.com/dev/notes
+      events:
+      - http:
+          path: category
+          method: put
+          cors: true
 
 plugins:
 - serverless-offline # adding the plugin to be able to run the offline emulation

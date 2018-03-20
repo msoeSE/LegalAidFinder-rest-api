@@ -9,20 +9,6 @@ const County = require('./models/County');
 const Eligibility = require('./models/Eligibility');
 const AgencyRequests = require('./models/AgencyRequests');
 
-module.exports.hello = function(event, context, callback) {
-
-  const response = {
-    statusCode: 200,
-    headers: {
-      "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
-      "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
-    },
-    body: JSON.stringify({ "message": "Hello World!" })
-  };
-
-  callback(null, response);
-};
-
 module.exports.createAgency = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
 
@@ -77,24 +63,6 @@ module.exports.createCategory = (event, context, callback) => {
         )}
       });
     })
-};
-
-module.exports.getOne = (event, context, callback) => {
-  context.callbackWaitsForEmptyEventLoop = false;
-
-  connectToDatabase()
-    .then(() => {
-      Note.findById(event.pathParameters.id)
-        .then(note => callback(null, {
-          statusCode: 200,
-          body: JSON.stringify(note)
-        }))
-        .catch(err => callback(null, {
-          statusCode: err.statusCode || 500,
-          headers: { 'Content-Type': 'text/plain' },
-          body: 'Could not fetch the note.'
-        }));
-    });
 };
 
 module.exports.getAllAdmin = (event, context, callback) => {
@@ -245,46 +213,81 @@ module.exports.getAllEligibility = (event, context, callback) => {
     });
 };
 
-module.exports.update = (event, context, callback) => {
+module.exports.updateAgency = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
 
   connectToDatabase()
     .then(() => {
-      Note.findByIdAndUpdate(event.pathParameters.id, JSON.parse(event.body), { new: true })
-        .then(note => callback(null, {
+      let req = JSON.parse(event.body);
+      var email_array = []
+      req.emails.forEach((email) => {
+        email_array.push(email.address);
+      });
+      Agency.findOneAndUpdate(req.query,
+        { name: req.name,
+          url: req.url,
+          emails: email_array
+        }, {upsert:true}, (err, saved) => callback(err, {
           statusCode: 200,
-          headers: {
-            "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
-            "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
-          },
-          body: JSON.stringify(note)
-        }))
-        .catch(err => callback(null, {
-          statusCode: err.statusCode || 500,
-          headers: { 'Content-Type': 'text/plain' },
-          body: 'Could not fetch the notes.'
-        }));
+          body: {agency: saved}
+        })
+      );
     });
 };
 
-module.exports.delete = (event, context, callback) => {
+module.exports.updateCategory = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
 
   connectToDatabase()
     .then(() => {
-      Note.findByIdAndRemove(event.pathParameters.id)
-        .then(note => callback(null, {
-          statusCode: 200,
-          headers: {
-            "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
-            "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
-          },
-          body: JSON.stringify({ message: 'Removed note with id: ' + note._id, note: note })
-        }))
-        .catch(err => callback(null, {
-          statusCode: err.statusCode || 500,
-          headers: { 'Content-Type': 'text/plain' },
-          body: 'Could not fetch the notes.'
-        }));
+      let req = JSON.parse(event.body);
+      req.subcategories.forEach((sub) => {
+        // Update new parent for subcategory
+        Category.findOneAndUpdate({ _id: sub._id },
+          {
+            name: sub.name,
+            parent: sub.new_parent,
+          });
+        // Remove from parent subcategory array
+        Category.findOneAndUpdate({ _id: sub.parent._id },
+          {
+            name: sub.parent.name,
+            subcategories: sub.parent.subcategories,
+          }, { upsert: true });
+      });
+    // Update subcategories and name for selected category
+    Category.findOneAndUpdate(req.query,
+      { name: req.name,
+        subcategories: req.subcategories,
+      }, { upsert: true }, (err, saved) => callback(err, {
+        statusCode: 200,
+        body: saved
+      }));
     });
+};
+
+module.exports.deleteAgency = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase()
+    .then(() => {
+      let req = JSON.parse(event.body);
+      Agency.remove({ _id: req.id }, (err, saved) => callback(err, {
+        statusCode: 200,
+        body: {agency: saved}
+      }));
+    })
+};
+
+module.exports.deleteCategory = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase()
+    .then(() => {
+      let req = JSON.parse(event.body);
+      Category.remove({ _id: req.id }, (err, saved) => callback(err, {
+        statusCode: 200,
+        body: {agency: saved}
+      }));
+    })
 };
