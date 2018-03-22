@@ -9,6 +9,20 @@ provider:
   region: us-east-1
 
 functions:
+  getAllEligibilityType:
+      handler: handler.getAllEligibilityType
+      events:
+      - http:
+          path: eligibilityType
+          method: get
+          cors: true
+  createEligibilityType:
+      handler: handler.createEligibilityType
+      events:
+      - http:
+          path: eligibilityType
+          method: post
+          cors: true
   createAgency:
       handler: handler.createAgency
       events:

@@ -8,6 +8,35 @@ const Category = require('./models/Category');
 const County = require('./models/County');
 const Eligibility = require('./models/Eligibility');
 const AgencyRequests = require('./models/AgencyRequests');
+const EligibilityType = require('./models/EligibilityType');
+
+module.exports.createEligibilityType = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase()
+    .then(() => {
+      let req = JSON.parse(event.body);
+      if (!req.name || !req.comparators || req.comparators.length === 0 || !req.valueType) {
+        callback(null, { statusCode: 403, body: "Invalid request", headers: { "Content-Type": "text/plain" } });
+      }
+
+      let newEligibilityType = new EligibilityType({
+        name: req.name,
+        comparators: req.comparators,
+        valueType: req.valueType,
+        _id: mongoose.Types.ObjectId()
+      });
+
+      newEligibilityType.save((err, saved) => callback(err, {
+        statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+          "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+        },
+        body: {eligibilityType: saved}
+      }));
+    });
+};
 
 module.exports.addAgencyToCategory = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
@@ -18,17 +47,17 @@ module.exports.addAgencyToCategory = (event, context, callback) => {
       if (!req.categoryId || !req.agencyId || req.pushAgency === null) {
         callback(null, { statusCode: 403, body: "Invalid request", headers: { "Content-Type": "text/plain" } });
       }
-      
+
       Category.findById(req.categoryId, (err, category) => {
         if (err)
           callback(err);
-      
+
         if (req.pushAgency) {
           category.agencies.addToSet(req.agencyId);
         } else {
           category.agencies.pull(req.agencyId);
         }
-      
+
         category.save((err, saved) => callback(err, {
           statusCode: 200,
           headers: {
@@ -38,7 +67,7 @@ module.exports.addAgencyToCategory = (event, context, callback) => {
           body: {category: saved}
         }));
       });
-    })
+    });
 };
 
 module.exports.createAgency = (event, context, callback) => {
@@ -66,7 +95,7 @@ module.exports.createAgency = (event, context, callback) => {
           "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
         },
         body: {agency: saved}
-      }));      
+      }));
     })
 };
 
@@ -114,7 +143,7 @@ module.exports.createEligibility = (event, context, callback) => {
       if (!req.agencyId || !req.categoryId || !req.data || req.data.length === 0) {
         callback(null, { statusCode: 403, body: "Invalid request", headers: { "Content-Type": "text/plain" } });
       }
-      
+
       Eligibility.findOne({ agency: req.agencyId, category: req.categoryId })
         .exec((err, elig) => {
           if (err) {
@@ -151,7 +180,7 @@ module.exports.createEligibility = (event, context, callback) => {
             }
           }
         }
-      ); 
+      );
 })};
 
 module.exports.getAllAdmin = (event, context, callback) => {
@@ -167,6 +196,28 @@ module.exports.getAllAdmin = (event, context, callback) => {
             "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
           },
           body: JSON.stringify(admins)
+        }))
+        .catch(err => callback(null, {
+          statusCode: err.statusCode || 500,
+          headers: { 'Content-Type': 'text/plain' },
+          body: 'Could not fetch the notes.'
+        }))
+    });
+};
+
+module.exports.getAllEligibilityType = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase()
+    .then(() => {
+      EligibilityType.find()
+        .then(eligibilityType => callback(null, {
+          statusCode: 200,
+          headers: {
+            "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+            "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+          },
+          body: JSON.stringify(eligibilityType)
         }))
         .catch(err => callback(null, {
           statusCode: err.statusCode || 500,
@@ -223,7 +274,7 @@ module.exports.getAllAgencyRequests = (event, context, callback) => {
 
 module.exports.getAllCategory = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
-  
+
   connectToDatabase()
     .then(() => {
       Category.find()
