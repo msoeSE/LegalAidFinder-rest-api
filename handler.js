@@ -105,6 +105,52 @@ module.exports.createCategory = (event, context, callback) => {
     })
 };
 
+module.exports.createEligibility = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase()
+    .then(() => {
+      let req = JSON.parse(event.body);
+      if (!req.categoryId || !req.agencyId || req.pushAgency === null) {
+        callback(null, { statusCode: 403, body: "Invalid request", headers: { "Content-Type": "text/plain" } });
+      }
+      
+      Eligibility.findOne({ agency: req.body.agencyId, category: req.body.categoryId })
+        .exec((err, elig) => {
+          if (err) {
+            callback(err);
+          } else {
+            if (elig === null) {
+              const newEligibility = new Eligibility({
+                _id: new mongoose.Types.ObjectId(),
+                agency: req.agencyId,
+                category: req.categoryId,
+                key_comparator_value: req.data,
+              });
+
+              newEligibility.save((error) => {
+                if (error) {
+                  callback(error);
+                }
+                res.json({ eligibilities: newEligibility });
+                return true;
+              });
+            } else {
+              elig.key_comparator_value = req.body.data;
+
+              elig.save((error, x) => {
+                if (error) {
+                  res.status(500).send(err);
+                }
+                res.json({ eligibilities: x });
+                return true;
+              });
+            }
+          }
+        }
+      );
+};
+
 module.exports.getAllAdmin = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
 

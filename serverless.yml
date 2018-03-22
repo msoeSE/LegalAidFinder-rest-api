@@ -23,6 +23,13 @@ functions:
           path: category
           method: post
           cors: true
+  createEligibility:
+    handler: handler.createAgency
+      events:
+      - http:
+          path: eligibility
+          method: post
+          cors: true
   getAllAdmin:
     handler: handler.getAllAdmin
     events:
@@ -93,12 +100,12 @@ functions:
           path: category
           method: put
           cors: true
-  updateEligibility:
+  addAgencyToCategory:
       handler: handler.addAgencyToCategory
       events:
       - http:
           path: category/agency
-          method: put
+          method: post
           cors: true
 
 plugins:
