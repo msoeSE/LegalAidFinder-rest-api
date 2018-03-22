@@ -9,6 +9,38 @@ const County = require('./models/County');
 const Eligibility = require('./models/Eligibility');
 const AgencyRequests = require('./models/AgencyRequests');
 
+module.exports.addAgencyToCategory = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase()
+    .then(() => {
+      let req = JSON.parse(event.body);
+      if (!req.categoryId || !req.agencyId || req.pushAgency === null) {
+        callback(null, { statusCode: 403, body: "Invalid request", headers: { "Content-Type": "text/plain" } });
+      }
+      
+      Category.findById(req.categoryId, (err, category) => {
+        if (err)
+          callback(err);
+      
+        if (req.pushAgency) {
+          category.agencies.addToSet(req.agencyId);
+        } else {
+          category.agencies.pull(req.agencyId);
+        }
+      
+        category.save((err, saved) => callback(err, {
+          statusCode: 200,
+          headers: {
+            "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+            "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+          },
+          body: {category: saved}
+        }));
+      });
+    })
+};
+
 module.exports.createAgency = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
 
@@ -235,15 +267,20 @@ module.exports.updateAgency = (event, context, callback) => {
         { name: req.name,
           url: req.url,
           emails: email_array
-        }, {upsert:true}, (err, saved) => callback(err, {
-          statusCode: 200,
-          headers: {
-            "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
-            "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
-          },
-          body: {agency: saved}
-        })
-      );
+        }, {upsert:true}, (err, saved) => {
+          if (err) {
+            callback(err);
+          } else {
+            callback(null, {
+            statusCode: 200,
+            headers: {
+              "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+              "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+            },
+            body: {agency: req.body}
+          })
+        }
+        });
     });
 };
 
@@ -315,3 +352,4 @@ module.exports.deleteCategory = (event, context, callback) => {
       }));
     })
 };
+

@@ -69,14 +69,14 @@ functions:
     handler: handler.deleteAgency
     events:
       - http:
-          path: agency/1
+          path: agency
           method: delete
           cors: true
   deleteCategory:
     handler: handler.deleteCategory
     events:
       - http:
-          path: category/1
+          path: category
           method: delete
           cors: true
   updateAgency:
@@ -91,6 +91,13 @@ functions:
       events:
       - http:
           path: category
+          method: put
+          cors: true
+  updateEligibility:
+      handler: handler.addAgencyToCategory
+      events:
+      - http:
+          path: category/agency
           method: put
           cors: true
 
