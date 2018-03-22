@@ -16,13 +16,18 @@ module.exports.createEligibilityType = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
       let req = JSON.parse(event.body);
-      if (!req.name || !req.comparators || req.comparators.length === 0 || !req.valueType) {
+      if (!req.name || !req.comparators || !req.valueType) {
         callback(null, { statusCode: 403, body: "Invalid request", headers: { "Content-Type": "text/plain" } });
       }
 
+      let compArray = [];
+      req.comparators.forEach((c) => {
+        compArray.push(c.val);
+      });
+
       let newEligibilityType = new EligibilityType({
         name: req.name,
-        comparators: req.comparators,
+        comparators: compArray,
         valueType: req.valueType,
         _id: mongoose.Types.ObjectId()
       });
