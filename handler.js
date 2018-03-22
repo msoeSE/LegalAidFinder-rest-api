@@ -98,7 +98,7 @@ module.exports.createCategory = (event, context, callback) => {
               "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
               "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
             },
-            body: {agency: saved}
+            body: {category: saved}
           })
         )}
       });
@@ -111,11 +111,11 @@ module.exports.createEligibility = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
       let req = JSON.parse(event.body);
-      if (!req.categoryId || !req.agencyId || req.pushAgency === null) {
+      if (!req.agencyId || !req.categoryId || !req.data || req.data.length === 0) {
         callback(null, { statusCode: 403, body: "Invalid request", headers: { "Content-Type": "text/plain" } });
       }
       
-      Eligibility.findOne({ agency: req.body.agencyId, category: req.body.categoryId })
+      Eligibility.findOne({ agency: req.agencyId, category: req.categoryId })
         .exec((err, elig) => {
           if (err) {
             callback(err);
@@ -128,28 +128,31 @@ module.exports.createEligibility = (event, context, callback) => {
                 key_comparator_value: req.data,
               });
 
-              newEligibility.save((error) => {
-                if (error) {
-                  callback(error);
-                }
-                res.json({ eligibilities: newEligibility });
-                return true;
-              });
+              newEligibility.save((error) => callback(error, {
+                statusCode: 200,
+                headers: {
+                  "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+                  "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+                },
+                body: {eligibilities: newEligibility}
+              }));
             } else {
-              elig.key_comparator_value = req.body.data;
+              elig.key_comparator_value = req.data;
 
-              elig.save((error, x) => {
-                if (error) {
-                  res.status(500).send(err);
-                }
-                res.json({ eligibilities: x });
-                return true;
-              });
+              elig.save((error, e) => callback(error, {
+                  statusCode: 200,
+                  headers: {
+                    "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+                    "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+                  },
+                  body: {eligibilities: e}
+                })
+              );
             }
           }
         }
-      );
-};
+      ); 
+})};
 
 module.exports.getAllAdmin = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;

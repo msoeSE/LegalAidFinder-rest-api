@@ -24,8 +24,8 @@ functions:
           method: post
           cors: true
   createEligibility:
-    handler: handler.createAgency
-      events:
+    handler: handler.createEligibility
+    events:
       - http:
           path: eligibility
           method: post
