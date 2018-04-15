@@ -232,6 +232,31 @@ module.exports.getAllEligibilityType = (event, context, callback) => {
     });
 };
 
+module.exports.addCountyToAgency = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase()
+    .then(() => {
+      Agency.findOneAndUpdate(req.query,
+        { 
+          counties: req.counties
+        }, {upsert:true}, (err, saved) => {
+          if (err) {
+            callback(err);
+          } else {
+            callback(null, {
+            statusCode: 200,
+            headers: {
+              "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+              "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+            },
+            body: {agency: req.body}
+          })
+        }
+      });
+    });
+};
+
 module.exports.getAllAgency = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
 
