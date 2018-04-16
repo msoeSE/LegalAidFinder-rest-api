@@ -93,6 +93,13 @@ functions:
           path: agency
           method: delete
           cors: true
+  deleteEligibilityType:
+    handler: handler.deleteEligibilityType
+    events:
+      - http:
+          path: eligibilityType
+          method: delete
+          cors: true
   deleteCategory:
     handler: handler.deleteCategory
     events:

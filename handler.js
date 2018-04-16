@@ -20,14 +20,9 @@ module.exports.createEligibilityType = (event, context, callback) => {
         callback(null, { statusCode: 403, body: "Invalid request", headers: { "Content-Type": "text/plain" } });
       }
 
-      let compArray = [];
-      req.comparators.forEach((c) => {
-        compArray.push(c.val);
-      });
-
       let newEligibilityType = new EligibilityType({
         name: req.name,
-        comparators: compArray,
+        comparators: req.comparators,
         valueType: req.valueType,
         _id: mongoose.Types.ObjectId()
       });
@@ -210,6 +205,24 @@ module.exports.getAllAdmin = (event, context, callback) => {
     });
 };
 
+module.exports.deleteEligibilityType = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase()
+    .then(() => {
+      let req = JSON.parse(event.body);
+
+      EligibilityType.remove({ _id: req.id }, (err, saved) => callback(err, {
+        statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+          "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+        },
+        body: {_id: req.id}
+      }));
+    })
+};
+
 module.exports.getAllEligibilityType = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
 
@@ -364,27 +377,25 @@ module.exports.updateAgency = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
       let req = JSON.parse(event.body);
-      var email_array = []
+      let email_array = [];
       req.emails.forEach((email) => {
         email_array.push(email.address);
       });
       Agency.findOneAndUpdate(req.query,
         { name: req.name,
           url: req.url,
-          emails: email_array
+          emails: email_array,
+          phone: req.phone,
+          operation: req.operation,
         }, {upsert:true}, (err, saved) => {
-          if (err) {
-            callback(err);
-          } else {
-            callback(null, {
+            callback(err, {
             statusCode: 200,
             headers: {
               "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
               "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
             },
-            body: {agency: req.body}
+            body: {agency: saved}
           })
-        }
         });
     });
 };
