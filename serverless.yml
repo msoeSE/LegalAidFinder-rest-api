@@ -128,6 +128,13 @@ functions:
           path: category/agency
           method: post
           cors: true
+ addCountyToAgency:
+      handler: handler.addAgencyToCategory
+      events:
+      - http:
+          path: county
+          method: post
+          cors: true
 
 plugins:
 - serverless-offline
