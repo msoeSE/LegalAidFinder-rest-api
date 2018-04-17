@@ -9,6 +9,20 @@ provider:
   region: us-east-1
 
 functions:
+  getAllEligibilityType:
+      handler: handler.getAllEligibilityType
+      events:
+      - http:
+          path: eligibilityType
+          method: get
+          cors: true
+  createEligibilityType:
+      handler: handler.createEligibilityType
+      events:
+      - http:
+          path: eligibilityType
+          method: post
+          cors: true
   createAgency:
       handler: handler.createAgency
       events:
@@ -21,6 +35,13 @@ functions:
       events:
       - http:
           path: category
+          method: post
+          cors: true
+  createEligibility:
+    handler: handler.createEligibility
+    events:
+      - http:
+          path: eligibility
           method: post
           cors: true
   getAllAdmin:
@@ -69,14 +90,21 @@ functions:
     handler: handler.deleteAgency
     events:
       - http:
-          path: agency/1
+          path: agency
+          method: delete
+          cors: true
+  deleteEligibilityType:
+    handler: handler.deleteEligibilityType
+    events:
+      - http:
+          path: eligibilityType
           method: delete
           cors: true
   deleteCategory:
     handler: handler.deleteCategory
     events:
       - http:
-          path: category/1
+          path: category
           method: delete
           cors: true
   updateAgency:
@@ -92,6 +120,20 @@ functions:
       - http:
           path: category
           method: put
+          cors: true
+  addAgencyToCategory:
+      handler: handler.addAgencyToCategory
+      events:
+      - http:
+          path: category/agency
+          method: post
+          cors: true
+ addCountyToAgency:
+      handler: handler.addAgencyToCategory
+      events:
+      - http:
+          path: county
+          method: post
           cors: true
 
 plugins:

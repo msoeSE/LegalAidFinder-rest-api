@@ -8,6 +8,67 @@ const Category = require('./models/Category');
 const County = require('./models/County');
 const Eligibility = require('./models/Eligibility');
 const AgencyRequests = require('./models/AgencyRequests');
+const EligibilityType = require('./models/EligibilityType');
+
+module.exports.createEligibilityType = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase()
+    .then(() => {
+      let req = JSON.parse(event.body);
+      if (!req.name || !req.comparators || !req.valueType) {
+        callback(null, { statusCode: 403, body: "Invalid request", headers: { "Content-Type": "text/plain" } });
+      }
+
+      let newEligibilityType = new EligibilityType({
+        name: req.name,
+        comparators: req.comparators,
+        valueType: req.valueType,
+        _id: mongoose.Types.ObjectId()
+      });
+
+      newEligibilityType.save((err, saved) => callback(err, {
+        statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+          "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+        },
+        body: {eligibilityType: saved}
+      }));
+    });
+};
+
+module.exports.addAgencyToCategory = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase()
+    .then(() => {
+      let req = JSON.parse(event.body);
+      if (!req.categoryId || !req.agencyId || req.pushAgency === null) {
+        callback(null, { statusCode: 403, body: "Invalid request", headers: { "Content-Type": "text/plain" } });
+      }
+
+      Category.findById(req.categoryId, (err, category) => {
+        if (err)
+          callback(err);
+
+        if (req.pushAgency) {
+          category.agencies.addToSet(req.agencyId);
+        } else {
+          category.agencies.pull(req.agencyId);
+        }
+
+        category.save((err, saved) => callback(err, {
+          statusCode: 200,
+          headers: {
+            "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+            "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+          },
+          body: {category: saved}
+        }));
+      });
+    });
+};
 
 module.exports.createAgency = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
@@ -66,41 +127,61 @@ module.exports.createCategory = (event, context, callback) => {
               "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
               "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
             },
-            body: {agency: saved}
+            body: {category: saved}
           })
         )}
       });
     })
 };
 
-module.exports.createAgencyRequest = (event, context, callback) => {
+module.exports.createEligibility = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
 
   connectToDatabase()
     .then(() => {
       let req = JSON.parse(event.body);
+      if (!req.agencyId || !req.categoryId || !req.data || req.data.length === 0) {
+        callback(null, { statusCode: 403, body: "Invalid request", headers: { "Content-Type": "text/plain" } });
+      }
 
-      var newRequest = new AgencyRequests({
-        agency_name: req.agency_name,
-		agency_email: req.agency_email,
-		agency_url: req.agency_url,
-		contact_name: req.contact_name,
-		contact_phone: req.contact_phone,
-		contact_email: req.contact_email,
-		comments: req.comments,
-        _id: mongoose.Types.ObjectId()
-      });
+      Eligibility.findOne({ agency: req.agencyId, category: req.categoryId })
+        .exec((err, elig) => {
+          if (err) {
+            callback(err);
+          } else {
+            if (elig === null) {
+              const newEligibility = new Eligibility({
+                _id: new mongoose.Types.ObjectId(),
+                agency: req.agencyId,
+                category: req.categoryId,
+                key_comparator_value: req.data,
+              });
 
-      newRequest.save((err, saved) => callback(err, {
-        statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
-          "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
-        },
-        body: {request: saved}
-      }));      
-    })
-};
+              newEligibility.save((error) => callback(error, {
+                statusCode: 200,
+                headers: {
+                  "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+                  "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+                },
+                body: {eligibilities: newEligibility}
+              }));
+            } else {
+              elig.key_comparator_value = req.data;
+
+              elig.save((error, e) => callback(error, {
+                  statusCode: 200,
+                  headers: {
+                    "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+                    "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+                  },
+                  body: {eligibilities: e}
+                })
+              );
+            }
+          }
+        }
+      );
+})};
 
 module.exports.getAllAdmin = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
@@ -121,6 +202,71 @@ module.exports.getAllAdmin = (event, context, callback) => {
           headers: { 'Content-Type': 'text/plain' },
           body: 'Could not fetch the notes.'
         }))
+    });
+};
+
+module.exports.deleteEligibilityType = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase()
+    .then(() => {
+      let req = JSON.parse(event.body);
+
+      EligibilityType.remove({ _id: req.id }, (err, saved) => callback(err, {
+        statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+          "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+        },
+        body: {_id: req.id}
+      }));
+    })
+};
+
+module.exports.getAllEligibilityType = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase()
+    .then(() => {
+      EligibilityType.find()
+        .then(eligibilityType => callback(null, {
+          statusCode: 200,
+          headers: {
+            "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+            "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+          },
+          body: JSON.stringify(eligibilityType)
+        }))
+        .catch(err => callback(null, {
+          statusCode: err.statusCode || 500,
+          headers: { 'Content-Type': 'text/plain' },
+          body: 'Could not fetch the notes.'
+        }))
+    });
+};
+
+module.exports.addCountyToAgency = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase()
+    .then(() => {
+      Agency.findOneAndUpdate(req.query,
+        { 
+          counties: req.counties
+        }, {upsert:true}, (err, saved) => {
+          if (err) {
+            callback(err);
+          } else {
+            callback(null, {
+            statusCode: 200,
+            headers: {
+              "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+              "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+            },
+            body: {agency: req.body}
+          })
+        }
+      });
     });
 };
 
@@ -256,23 +402,26 @@ module.exports.updateAgency = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
       let req = JSON.parse(event.body);
-      var email_array = []
+      let email_array = [];
       req.emails.forEach((email) => {
         email_array.push(email.address);
       });
       Agency.findOneAndUpdate(req.query,
         { name: req.name,
           url: req.url,
-          emails: email_array
-        }, {upsert:true}, (err, saved) => callback(err, {
-          statusCode: 200,
-          headers: {
-            "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
-            "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
-          },
-          body: {agency: saved}
-        })
-      );
+          emails: email_array,
+          phone: req.phone,
+          operation: req.operation,
+        }, {upsert:true}, (err, saved) => {
+            callback(err, {
+            statusCode: 200,
+            headers: {
+              "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+              "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+            },
+            body: {agency: saved}
+          })
+        });
     });
 };
 
