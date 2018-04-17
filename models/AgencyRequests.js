@@ -2,9 +2,13 @@ const mongoose = require('mongoose');
 
 const AgencyRequestsSchema = new mongoose.Schema({
   _id: { type: mongoose.Schema.Types.ObjectId },
-  name: { type: 'String', required: true },
-  email: [{ type: mongoose.Schema.Types.String }],
-  url: { type: 'String' },
+  agency_name: { type: 'String', required: true },
+  agency_email: { type: mongoose.Schema.Types.String, required: true },
+  agency_url: { type: 'String', required: true },
+  contact_name: { type: 'String', required: true },
+  contact_phone: {type: 'String', required: true },
+  contact_email: { type: mongoose.Schema.Types.String, required: true },
+  comments: { type: 'String' },
 });
 
 module.exports = mongoose.model('Agencyrequests', AgencyRequestsSchema);
