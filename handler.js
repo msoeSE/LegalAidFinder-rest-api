@@ -73,6 +73,35 @@ module.exports.createCategory = (event, context, callback) => {
     })
 };
 
+module.exports.createAgencyRequest = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase()
+    .then(() => {
+      let req = JSON.parse(event.body);
+
+      var newRequest = new AgencyRequests({
+        agency_name: req.agency_name,
+		agency_email: req.agency_email,
+		agency_url: req.agency_url,
+		contact_name: req.contact_name,
+		contact_phone: req.contact_phone,
+		contact_email: req.contact_email,
+		comments: req.comments,
+        _id: mongoose.Types.ObjectId()
+      });
+
+      newRequest.save((err, saved) => callback(err, {
+        statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+          "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+        },
+        body: {request: saved}
+      }));      
+    })
+};
+
 module.exports.getAllAdmin = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
 
