@@ -237,22 +237,29 @@ module.exports.addCountyToAgency = (event, context, callback) => {
 
   connectToDatabase()
     .then(() => {
-      Agency.findOneAndUpdate(req.query,
-        { 
-          counties: req.counties
-        }, {upsert:true}, (err, saved) => {
-          if (err) {
-            callback(err);
-          } else {
-            callback(null, {
-            statusCode: 200,
-            headers: {
-              "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
-              "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
-            },
-            body: {agency: req.body}
-          })
+      let req = JSON.parse(event.body);
+      if (!req.agencyId || !req.countyId || req.pushCounty === null) {
+        callback(null, { statusCode: 403, body: "Invalid request", headers: { "Content-Type": "text/plain" } });
+      }
+
+      Agency.findById(req.agencyId, (err, agency) => {
+        if (err)
+          callback(err);
+
+        if (req.pushCounty) {
+          agency.counties.addToSet(req.countyId);
+        } else {
+          agency.counties.pull(req.countyId);
         }
+
+        category.save((err, saved) => callback(err, {
+          statusCode: 200,
+          headers: {
+            "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+            "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+          },
+          body: { agency: saved }
+        }));
       });
     });
 };

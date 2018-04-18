@@ -121,8 +121,8 @@ functions:
           path: category/agency
           method: post
           cors: true
- addCountyToAgency:
-      handler: handler.addAgencyToCategory
+  addCountyToAgency:
+      handler: handler.addCountyToAgency
       events:
       - http:
           path: county
