@@ -95,7 +95,7 @@ module.exports.createAgency = (event, context, callback) => {
           "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
         },
         body: {agency: saved}
-      }));      
+      }));
     })
 };
 
@@ -159,7 +159,7 @@ module.exports.createAgencyRequest = (event, context, callback) => {
           "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
         },
         body: {request: saved}
-      }));      
+      }));
     })
 };
 
@@ -353,7 +353,7 @@ module.exports.getAllAgencyRequests = (event, context, callback) => {
 
 module.exports.getAllCategory = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
-  
+
   connectToDatabase()
     .then(() => {
       Category.find()
@@ -448,6 +448,9 @@ module.exports.updateAgency = (event, context, callback) => {
           emails: email_array,
           phone: req.phone,
           operation: req.operation,
+          address: req.address,
+          zipcode: req.zipcode,
+          city: req.city,
         }, {upsert:true}, (err, saved) => {
             callback(err, {
             statusCode: 200,
