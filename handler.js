@@ -294,7 +294,7 @@ module.exports.addCountyToAgency = (event, context, callback) => {
           agency.counties.pull(req.countyId);
         }
 
-        category.save((err, saved) => callback(err, {
+        agency.save((err, saved) => callback(err, {
           statusCode: 200,
           headers: {
             "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
