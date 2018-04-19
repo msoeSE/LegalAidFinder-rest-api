@@ -280,7 +280,7 @@ module.exports.addCountyToAgency = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
       let req = JSON.parse(event.body);
-      if (!req.agencyId || !req.countyId || req.pushCounty === null) {
+      if (!req.agencyId || !req.countyName || req.pushCounty === null) {
         callback(null, { statusCode: 403, body: "Invalid request", headers: { "Content-Type": "text/plain" } });
       }
 
@@ -289,9 +289,9 @@ module.exports.addCountyToAgency = (event, context, callback) => {
           callback(err);
 
         if (req.pushCounty) {
-          agency.counties.addToSet(req.countyId);
+          agency.counties.addToSet(req.countyName);
         } else {
-          agency.counties.pull(req.countyId);
+          agency.counties.pull(req.countyName);
         }
 
         agency.save((err, saved) => callback(err, {
