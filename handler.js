@@ -95,7 +95,7 @@ module.exports.createAgency = (event, context, callback) => {
           "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
         },
         body: {agency: saved}
-      }));      
+      }));
     })
 };
 
@@ -159,7 +159,7 @@ module.exports.createAgencyRequest = (event, context, callback) => {
           "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
         },
         body: {request: saved}
-      }));      
+      }));
     })
 };
 
@@ -279,22 +279,29 @@ module.exports.addCountyToAgency = (event, context, callback) => {
 
   connectToDatabase()
     .then(() => {
-      Agency.findOneAndUpdate(req.query,
-        { 
-          counties: req.counties
-        }, {upsert:true}, (err, saved) => {
-          if (err) {
-            callback(err);
-          } else {
-            callback(null, {
-            statusCode: 200,
-            headers: {
-              "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
-              "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
-            },
-            body: {agency: req.body}
-          })
+      let req = JSON.parse(event.body);
+      if (!req.agencyId || !req.countyName || req.pushCounty === null) {
+        callback(null, { statusCode: 403, body: "Invalid request", headers: { "Content-Type": "text/plain" } });
+      }
+
+      Agency.findById(req.agencyId, (err, agency) => {
+        if (err)
+          callback(err);
+
+        if (req.pushCounty) {
+          agency.counties.addToSet(req.countyName);
+        } else {
+          agency.counties.pull(req.countyName);
         }
+
+        agency.save((err, saved) => callback(err, {
+          statusCode: 200,
+          headers: {
+            "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+            "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+          },
+          body: { agency: saved }
+        }));
       });
     });
 };
@@ -346,7 +353,7 @@ module.exports.getAllAgencyRequests = (event, context, callback) => {
 
 module.exports.getAllCategory = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
-  
+
   connectToDatabase()
     .then(() => {
       Category.find()
@@ -441,6 +448,9 @@ module.exports.updateAgency = (event, context, callback) => {
           emails: email_array,
           phone: req.phone,
           operation: req.operation,
+          address: req.address,
+          zipcode: req.zipcode,
+          city: req.city,
         }, {upsert:true}, (err, saved) => {
             callback(err, {
             statusCode: 200,

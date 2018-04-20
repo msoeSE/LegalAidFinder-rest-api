@@ -7,7 +7,10 @@ const AgencySchema = new mongoose.Schema({
   counties: [{type: 'String'}],
   url: { type: 'String', required: true },
   phone: { type: 'String' },
-  operation: { type: 'String'}
+  operation: { type: 'String'},
+  address: { type: 'String'},
+  zipcode: { type: 'String'},
+  city: { type: 'String'}
 });
 
 module.exports = mongoose.model('Agency', AgencySchema);
