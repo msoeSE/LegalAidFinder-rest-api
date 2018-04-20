@@ -30,6 +30,13 @@ functions:
           path: agency
           method: post
           cors: true
+  createAgencyRequest:
+      handler: handler.createAgencyRequest
+      events:
+      - http:
+          path: agencyrequests
+          method: post
+          cors: true
   createCategory:
       handler: handler.createCategory
       events:

@@ -506,6 +506,23 @@ module.exports.deleteAgency = (event, context, callback) => {
     })
 };
 
+module.exports.deleteAgencyRequest = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase()
+    .then(() => {
+      let req = JSON.parse(event.body);
+      AgencyRequests.remove({ _id: req.id }, (err, saved) => callback(err, {
+        statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+          "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+        },
+        body: {request: saved}
+      }));
+    })
+};
+
 module.exports.deleteCategory = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
 
