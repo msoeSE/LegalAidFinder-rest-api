@@ -27,7 +27,7 @@ module.exports.createEligibilityType = (event, context, callback) => {
         _id: mongoose.Types.ObjectId()
       });
 
-      newEligibilityType.save((err, saved) => callback(err, {
+      newEligibilityType.save((err, saved) => callback(null, {
         statusCode: 200,
         headers: {
           "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
@@ -58,7 +58,7 @@ module.exports.addAgencyToCategory = (event, context, callback) => {
           category.agencies.pull(req.agencyId);
         }
 
-        category.save((err, saved) => callback(err, {
+        category.save((err, saved) => callback(null, {
           statusCode: 200,
           headers: {
             "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
@@ -88,7 +88,7 @@ module.exports.createAgency = (event, context, callback) => {
         _id: mongoose.Types.ObjectId()
       });
 
-      newAgency.save((err, saved) => callback(err, {
+      newAgency.save((err, saved) => callback(null, {
         statusCode: 200,
         headers: {
           "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
@@ -121,7 +121,7 @@ module.exports.createCategory = (event, context, callback) => {
           {
             name: req.parent.name,
             subcategories: subs
-          }, {upsert:true}, (err, saved) => callback(err, {
+          }, {upsert:true}, (err, saved) => callback(null, {
             statusCode: 200,
             headers: {
               "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
@@ -152,7 +152,7 @@ module.exports.createAgencyRequest = (event, context, callback) => {
         _id: mongoose.Types.ObjectId()
       });
 
-      newRequest.save((err, saved) => callback(err, {
+      newRequest.save((err, saved) => callback(null, {
         statusCode: 200,
         headers: {
           "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
@@ -186,7 +186,7 @@ module.exports.createEligibility = (event, context, callback) => {
                 key_comparator_value: req.data,
               });
 
-              newEligibility.save((error) => callback(error, {
+              newEligibility.save((error) => callback(null, {
                 statusCode: 200,
                 headers: {
                   "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
@@ -197,7 +197,7 @@ module.exports.createEligibility = (event, context, callback) => {
             } else {
               elig.key_comparator_value = req.data;
 
-              elig.save((error, e) => callback(error, {
+              elig.save((error, e) => callback(null, {
                   statusCode: 200,
                   headers: {
                     "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
@@ -241,7 +241,7 @@ module.exports.deleteEligibilityType = (event, context, callback) => {
     .then(() => {
       let req = JSON.parse(event.body);
 
-      EligibilityType.remove({ _id: req.id }, (err, saved) => callback(err, {
+      EligibilityType.remove({ _id: req.id }, (err, saved) => callback(null, {
         statusCode: 200,
         headers: {
           "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
@@ -294,7 +294,7 @@ module.exports.addCountyToAgency = (event, context, callback) => {
           agency.counties.pull(req.countyName);
         }
 
-        agency.save((err, saved) => callback(err, {
+        agency.save((err, saved) => callback(null, {
           statusCode: 200,
           headers: {
             "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
@@ -452,7 +452,7 @@ module.exports.updateAgency = (event, context, callback) => {
           zipcode: req.zipcode,
           city: req.city,
         }, {upsert:true}, (err, saved) => {
-            callback(err, {
+            callback(null, {
             statusCode: 200,
             headers: {
               "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
@@ -488,7 +488,7 @@ module.exports.updateCategory = (event, context, callback) => {
     Category.findOneAndUpdate(req.query,
       { name: req.name,
         subcategories: req.subcategories,
-      }, { upsert: true }, (err, saved) => callback(err, {
+      }, { upsert: true }, (err, saved) => callback(null, {
         statusCode: 200,
         headers: {
           "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
@@ -505,7 +505,7 @@ module.exports.deleteAgency = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
       let req = JSON.parse(event.body);
-      Agency.remove({ _id: req.id }, (err, saved) => callback(err, {
+      Agency.remove({ _id: req.id }, (err, saved) => callback(null, {
         statusCode: 200,
         headers: {
           "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
@@ -522,7 +522,7 @@ module.exports.deleteAgencyRequest = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
       let req = JSON.parse(event.body);
-      AgencyRequests.remove({ _id: req.id }, (err, saved) => callback(err, {
+      AgencyRequests.remove({ _id: req.id }, (err, saved) => callback(null, {
         statusCode: 200,
         headers: {
           "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
@@ -539,7 +539,7 @@ module.exports.deleteCategory = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
       let req = JSON.parse(event.body);
-      Category.remove({ _id: req.id }, (err, saved) => callback(err, {
+      Category.remove({ _id: req.id }, (err, saved) => callback(null, {
         statusCode: 200,
         headers: {
           "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
