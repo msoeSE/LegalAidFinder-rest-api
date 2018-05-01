@@ -31,7 +31,8 @@ module.exports.createEligibilityType = (event, context, callback) => {
         statusCode: 200,
         headers: {
           "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
-          "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+          "Access-Control-Allow-Credentials" : true, // Required for cookies, authorization headers with HTTPS
+            "Access-Control-Allow-Headers": "*"
         },
         body: {eligibilityType: saved}
       }));
@@ -456,7 +457,8 @@ module.exports.updateAgency = (event, context, callback) => {
             statusCode: 200,
             headers: {
               "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
-              "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+              "Access-Control-Allow-Credentials" : true, // Required for cookies, authorization headers with HTTPS
+                "Access-Control-Allow-Headers": "*"
             },
             body: {agency: saved}
           })
