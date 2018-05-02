@@ -135,6 +135,13 @@ functions:
           path: category
           method: put
           cors: true
+  updateAgencyRequest:
+      handler: handler.updateAgencyRequest
+      events:
+      - http:
+          path: agencyrequests
+          method: put
+          cors: true
   addAgencyToCategory:
       handler: handler.addAgencyToCategory
       events:

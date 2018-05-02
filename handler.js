@@ -149,6 +149,9 @@ module.exports.createAgencyRequest = (event, context, callback) => {
 		contact_phone: req.contact_phone,
 		contact_email: req.contact_email,
 		comments: req.comments,
+		request_status: req.request_status,
+		date_submitted: req.date_submitted,
+		date_accepted: req.date_accepted
         _id: mongoose.Types.ObjectId()
       });
 
@@ -451,6 +454,36 @@ module.exports.updateAgency = (event, context, callback) => {
           address: req.address,
           zipcode: req.zipcode,
           city: req.city,
+        }, {upsert:true}, (err, saved) => {
+            callback(err, {
+            statusCode: 200,
+            headers: {
+              "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+              "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+            },
+            body: {agency: saved}
+          })
+        });
+    });
+};
+
+module.exports.updateAgencyRequest = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase()
+    .then(() => {
+      let req = JSON.parse(event.body);
+      AgencyRequests.findOneAndUpdate(req.query,
+		{ agency_name: req.agency_name,
+			agency_email: req.agency_email,
+			agency_url: req.agency_url,
+			contact_name: req.contact_name,
+			contact_phone: req.contact_phone,
+			contact_email: req.contact_email,
+			comments: req.comments,
+			request_status: req.request_status,
+			date_submitted: req.date_submitted,
+			date_accepted: req.date_accepted
         }, {upsert:true}, (err, saved) => {
             callback(err, {
             statusCode: 200,
