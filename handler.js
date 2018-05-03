@@ -107,7 +107,7 @@ module.exports.createCategory = (event, context, callback) => {
       let req = JSON.parse(event.body);
       var newCategory = new Category({
         name: req.name,
-        _id: mongoose.Types.ObjectId(),
+        _id: req._id ? req._id : mongoose.Types.ObjectId(),
         parent: req.parent,
       });
 
@@ -115,21 +115,15 @@ module.exports.createCategory = (event, context, callback) => {
         if (err) {
           callback(err);
         } else {
-          let subs = req.parent.subcategories;
-          subs.push(saved);
-          Category.findOneAndUpdate({ _id: req.parent._id },
-          {
-            name: req.parent.name,
-            subcategories: subs
-          }, {upsert:true}, (err, saved) => callback(err, {
+          callback(err, {
             statusCode: 200,
             headers: {
-              "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
-              "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+              "Access-Control-Allow-Origin": "*", // Required for CORS support to work
+              "Access-Control-Allow-Credentials": true // Required for cookies, authorization headers with HTTPS
             },
             body: {category: saved}
-          })
-        )}
+          });
+        }
       });
     })
 };
@@ -141,14 +135,14 @@ module.exports.createAgencyRequest = (event, context, callback) => {
     .then(() => {
       let req = JSON.parse(event.body);
 
-      var newRequest = new AgencyRequests({
+      let newRequest = new AgencyRequests({
         agency_name: req.agency_name,
-		agency_email: req.agency_email,
-		agency_url: req.agency_url,
-		contact_name: req.contact_name,
-		contact_phone: req.contact_phone,
-		contact_email: req.contact_email,
-		comments: req.comments,
+        agency_email: req.agency_email,
+        agency_url: req.agency_url,
+        contact_name: req.contact_name,
+        contact_phone: req.contact_phone,
+        contact_email: req.contact_email,
+        comments: req.comments,
         _id: mongoose.Types.ObjectId()
       });
 
@@ -470,32 +464,30 @@ module.exports.updateCategory = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
       let req = JSON.parse(event.body);
-      req.subcategories.forEach((sub) => {
-        // Update new parent for subcategory
-        Category.findOneAndUpdate({ _id: sub._id },
-          {
-            name: sub.name,
-            parent: sub.new_parent,
-          });
-        // Remove from parent subcategory array
-        Category.findOneAndUpdate({ _id: sub.parent._id },
-          {
-            name: sub.parent.name,
-            subcategories: sub.parent.subcategories,
-          }, { upsert: true });
+
+      if(!req.subcategories || !req.deletedSubcategories || !req.query || !req.name) {
+        callback("Error");
+      }
+
+      req.deletedSubcategories.forEach((sub) => {
+        Category.find({_id: sub._id}).remove().exec();
       });
-    // Update subcategories and name for selected category
-    Category.findOneAndUpdate(req.query,
-      { name: req.name,
-        subcategories: req.subcategories,
-      }, { upsert: true }, (err, saved) => callback(err, {
-        statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
-          "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
-        },
-        body: saved
-      }));
+
+      console.log(req.subcategories.toString());
+      console.log(req.name);
+      // Update subcategories and name for selected category
+      Category.findOneAndUpdate(req.query,
+        { name: req.name,
+          subcategories: req.subcategories,
+        }, { upsert: true }, (err, saved) => callback(err, {
+          statusCode: 200,
+          headers: {
+            "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+            "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+          },
+          body: saved
+        })
+      );
     });
 };
 
@@ -539,13 +531,25 @@ module.exports.deleteCategory = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
       let req = JSON.parse(event.body);
-      Category.remove({ _id: req.id }, (err, saved) => callback(err, {
-        statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
-          "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
-        },
-        body: {agency: saved}
-      }));
-    })
+
+      Category.findOne({_id: req.parent._id})
+        .exec((err, parent) => {
+          console.log(parent.subcategories);
+          parent.subcategories = parent.subcategories.filter(x => !x.equals(req.id));
+          console.log(parent.subcategories);
+          parent.save((err, saved) => {
+            // Nothing
+          });
+        });
+
+      Category.findByIdAndRemove(req.id).exec((err, result) =>
+        callback(err, {
+          statusCode: 200,
+          headers: {
+            "Access-Control-Allow-Origin": "*", // Required for CORS support to work
+            "Access-Control-Allow-Credentials": true // Required for cookies, authorization headers with HTTPS
+          },
+          body: {category: result}
+        }));
+    });
 };
