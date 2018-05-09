@@ -9,7 +9,7 @@ const AgencyRequestsSchema = new mongoose.Schema({
   contact_phone: {type: 'String', required: true },
   contact_email: { type: mongoose.Schema.Types.String, required: true },
   comments: { type: 'String' },
-  request_status: { type: 'Int32', required: true },
+  request_status: { type: 'Number', required: true },
   date_submitted: { type: 'String', required: true },
   date_accepted: { type: 'String', required: true }
 });
