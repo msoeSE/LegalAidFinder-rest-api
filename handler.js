@@ -134,6 +134,28 @@ module.exports.createCategory = (event, context, callback) => {
     })
 };
 
+module.exports.createAdmin = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase()
+    .then(() => {
+    let req = JSON.parse(event.body);
+  var newAdmin = new Admin({
+      _id: mongoose.Types.ObjectId(),
+      email: req.email
+  });
+
+  newAdmin.save((err, saved) => callback(err, {
+    statusCode: 200,
+    headers: {
+      "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+      "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+    },
+    body: {admin: saved}
+  }));
+})
+};
+
 module.exports.createAgencyRequest = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
 
@@ -514,6 +536,23 @@ module.exports.deleteAgency = (event, context, callback) => {
         body: {agency: saved}
       }));
     })
+};
+
+module.exports.deleteAdmin = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase()
+    .then(() => {
+    let req = JSON.parse(event.body);
+    Admin.remove({ _id: req.id }, (err, saved) => callback(err, {
+      statusCode: 200,
+     headers: {
+      "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+      "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+    },
+    body: {admin: saved}
+  }));
+})
 };
 
 module.exports.deleteAgencyRequest = (event, context, callback) => {
