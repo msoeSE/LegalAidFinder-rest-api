@@ -168,7 +168,7 @@ functions:
       events:
       - http:
           path: homepage
-          method: post
+          method: put
           cors: true
 
 plugins:
