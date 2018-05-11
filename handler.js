@@ -628,7 +628,7 @@ module.exports.updateHomePage = (event, context, callback) => {
             console.log(req.title);
             console.log(req.description);
             // Update title and description
-            HomePage.findOneAndUpdate({},{ title: req.title, // TODO: Make sure this works without a query, add one to the database first
+            HomePage.findOneAndUpdate({},{ title: req.title,
                     description: req.description,
                 }, { upsert: true }, (err, saved) => callback(err, {
                     statusCode: 200,
