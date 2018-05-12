@@ -11,7 +11,7 @@ const AgencyRequestsSchema = new mongoose.Schema({
   comments: { type: 'String' },
   request_status: { type: 'Number', required: true },
   date_submitted: { type: 'Date', required: true },
-  date_accepted: { type: 'Date', required: true }
+  date_accepted: { type: 'Date' }
 });
 
 module.exports = mongoose.model('Agencyrequests', AgencyRequestsSchema);
