@@ -121,6 +121,20 @@ functions:
           path: category
           method: delete
           cors: true
+  deleteAdmin:
+    handler: handler.deleteAdmin
+    events:
+      - http:
+          path: admin
+          method: delete
+          cors: true
+  createAdmin:
+      handler: handler.createAdmin
+      events:
+      - http:
+          path: admin
+          method: post
+          cors: true
   updateAgency:
       handler: handler.updateAgency
       events:
