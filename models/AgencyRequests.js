@@ -10,8 +10,8 @@ const AgencyRequestsSchema = new mongoose.Schema({
   contact_email: { type: mongoose.Schema.Types.String, required: true },
   comments: { type: 'String' },
   request_status: { type: 'Number', required: true },
-  date_submitted: { type: 'Date', required: true },
-  date_accepted: { type: 'Date' }
+  date_submitted: { type: 'String', required: true },
+  date_accepted: { type: 'String' }
 });
 
 module.exports = mongoose.model('Agencyrequests', AgencyRequestsSchema);
