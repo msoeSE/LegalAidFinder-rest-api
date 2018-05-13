@@ -10,6 +10,7 @@ const Eligibility = require('./models/Eligibility');
 const AgencyRequests = require('./models/AgencyRequests');
 const EligibilityType = require('./models/EligibilityType');
 const HomePage = require('./models/HomePage');
+const Header = require('./models/Header');
 
 module.exports.createEligibilityType = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
@@ -630,6 +631,54 @@ module.exports.updateHomePage = (event, context, callback) => {
             // Update title and description
             HomePage.findOneAndUpdate({},{ title: req.title,
                     description: req.description,
+                }, { upsert: true }, (err, saved) => callback(err, {
+                    statusCode: 200,
+                    headers: {
+                        "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+                        "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+                    },
+                    body: saved
+                })
+            );
+        });
+};
+
+module.exports.getHeader = (event, context, callback) => {
+    context.callbackWaitsForEmptyEventLoop = false;
+
+    connectToDatabase()
+        .then(() => {
+            Header.findOne()
+                .then(homePageInfo => callback(null, {
+                    statusCode: 200,
+                    headers: {
+                        "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+                        "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+                    },
+                    body: JSON.stringify(homePageInfo)
+                }))
+                .catch(err => callback(null, {
+                    statusCode: err.statusCode || 500,
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: 'Could not fetch the home page info.'
+                }))
+        });
+};
+
+
+module.exports.updateHeader = (event, context, callback) => {
+    context.callbackWaitsForEmptyEventLoop = false;
+
+    connectToDatabase()
+        .then(() => {
+            let req = JSON.parse(event.body);
+
+            if(!req.header) {
+                callback("Error");
+            }
+
+            // Update header
+            Header.findOneAndUpdate({},{ header: req.header
                 }, { upsert: true }, (err, saved) => callback(err, {
                     statusCode: 200,
                     headers: {

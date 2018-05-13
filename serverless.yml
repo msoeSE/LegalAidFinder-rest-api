@@ -170,6 +170,20 @@ functions:
           path: homepage
           method: put
           cors: true
+  getHeader:
+      handler: handler.getHeader
+      events:
+      - http:
+          path: header
+          method: get
+          cors: true
+  updateHeader:
+      handler: handler.updateHeader
+      events:
+      - http:
+          path: header
+          method: put
+          cors: true
 
 plugins:
 - serverless-offline
