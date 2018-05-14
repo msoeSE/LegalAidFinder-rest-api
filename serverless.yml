@@ -170,6 +170,34 @@ functions:
           path: county
           method: post
           cors: true
+  getHomePageInfo:
+      handler: handler.getHomePageInfo
+      events:
+      - http:
+          path: homepage
+          method: get
+          cors: true
+  updateHomePage:
+      handler: handler.updateHomePage
+      events:
+      - http:
+          path: homepage
+          method: put
+          cors: true
+  getHeader:
+      handler: handler.getHeader
+      events:
+      - http:
+          path: header
+          method: get
+          cors: true
+  updateHeader:
+      handler: handler.updateHeader
+      events:
+      - http:
+          path: header
+          method: put
+          cors: true
 
 plugins:
 - serverless-offline
